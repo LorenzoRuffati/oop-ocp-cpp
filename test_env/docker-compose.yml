@@ -1,0 +1,9 @@
+version: '3.3'
+services:
+  dev-env:
+    build:
+      context: ../
+      dockerfile: test_env/Dockerfile
+    stdin_open: true
+    tty: true
+    # Launch with docker-compose up -d, attach with docker-compose exec dev-env bash
