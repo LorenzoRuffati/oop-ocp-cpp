@@ -15,15 +15,9 @@ public:
     OptArgs optargs;
 };
 
-ParsedRes::ParsedRes(int argc, char** argv)
-{
-    std::cout << "Parsing the arguments" << std::endl;
-    role = Role::sender;
-    method = Method::queue;
-    optargs = (OptArgs) {};
-}
 
-ParsedRes::~ParsedRes(){
-    std::cout << "Destroying parsed arguments" << std::endl;
-}
+class NotImplemented : public std::exception {
+    public:
+        char * what ();
+};
 #endif

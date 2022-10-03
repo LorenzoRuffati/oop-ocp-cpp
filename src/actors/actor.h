@@ -5,13 +5,13 @@
 
 class Actor {
 public:
-    virtual int execute(IPC& ipc);
-    virtual ~Actor();
+    virtual int execute(IPC* ipc)=0;
+    virtual ~Actor(){}
 };
 
 class ActorFactory
 {
 public:
-    static Actor create(Role role, OptArgs& args);
+    static Actor* create(Role role, OptArgs& args);
 };
 #endif
