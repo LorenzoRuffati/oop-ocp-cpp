@@ -1,7 +1,7 @@
 cc_library(
     name = "helplib",
     srcs = [
-        "help.cpp",
+        "help.cc",
         "help.h",
     ],
     hdrs = ["help.h"],
@@ -13,6 +13,6 @@ cc_library(
 
 cc_binary(
     name = "src",
-    srcs = ["main.cpp"],
+    srcs = ["main.cc"],
     deps = [":helplib"]
 )
