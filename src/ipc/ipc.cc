@@ -39,7 +39,7 @@ class MockIPC: public IPC{
 };
 
 
-IPC* IPCFactory::get_ipc(Method method, Role role, OptArgs& args){
-    return new MockIPC(args);
+std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args){
+    return std::unique_ptr<IPC>(new MockIPC(args));
 
 }

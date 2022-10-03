@@ -2,6 +2,7 @@
 #define IPC_H_DEF
 #include <cstddef>
 #include <vector>
+#include <memory>
 
 #include "src/utils/types.h"
 using byte = unsigned char;
@@ -23,6 +24,6 @@ public:
 class IPCFactory {
 public:
     // Generate an instance IPC based on the desired method, role and parameters
-    static IPC* get_ipc(Method method, Role role, OptArgs& args);
+    static std::unique_ptr<IPC> get_ipc(Method method, Role role, OptArgs& args);
 };
 #endif

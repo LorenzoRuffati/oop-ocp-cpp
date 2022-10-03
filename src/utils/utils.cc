@@ -8,10 +8,6 @@ ParsedRes::ParsedRes(int argc, char** argv)
     optargs = (OptArgs) {};
 }
 
-ParsedRes::~ParsedRes(){
-    std::cout << "Destroying parsed arguments" << std::endl;
-}
-        
 char * NotImplemented::what () {
     return "Not implemented";
 }

@@ -8,17 +8,17 @@ public:
         std::cout << "Creating sender" << std::endl;
     }
 
-    int execute(IPC* ipc) final{
+    int execute(IPC& ipc) final{
         std::cout << "Executing sender" << std::endl;
-        size_t buff_s = ipc->buff_size();
+        size_t buff_s = ipc.buff_size();
         std::vector<byte> exvec{'a','b','c'};
-        while (ipc->ready()){
-            ipc->send(exvec);
+        while (ipc.ready()){
+            ipc.send(exvec);
         }
         return 0;        
     }
 };
 
-Actor* ActorFactory::create(Role role, OptArgs& args){
-    return new Sender(args);
+std::unique_ptr<Actor> ActorFactory::create(Role role, OptArgs& args){
+    return std::unique_ptr<Actor>(new Sender(args));
 }
