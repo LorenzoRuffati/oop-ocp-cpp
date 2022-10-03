@@ -1,3 +1,5 @@
+#ifndef IPC_H_DEF
+#define IPC_H_DEF
 #include <cstddef>
 #include <vector>
 
@@ -6,6 +8,7 @@ using byte = unsigned char;
 
 
 class IPC {
+public:
     virtual size_t buff_size();
     virtual std::vector<byte> receive(size_t max_read);
     virtual int send(std::vector<byte>);
@@ -20,5 +23,6 @@ class IPC {
 class IPCFactory {
 public:
     // Generate an instance IPC based on the desired method, role and parameters
-    static IPC get_ipc(Method method, Role role, OptArgs args);
+    static IPC get_ipc(Method method, Role role, OptArgs& args);
 };
+#endif

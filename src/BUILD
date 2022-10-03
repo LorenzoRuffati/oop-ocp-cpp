@@ -13,6 +13,6 @@ cc_library(
 
 cc_binary(
     name = "src",
-    srcs = ["main.cc"],
+    srcs = glob(["**/*.cc", "**/*.h"]),
     deps = [":helplib"]
 )

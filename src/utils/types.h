@@ -1,3 +1,5 @@
+#ifndef TYPES_H_DEF
+#define TYPES_H_DEF
 enum class Role {
     sender,
     receiver,
@@ -13,3 +15,4 @@ enum class Method {
 typedef struct {
     //    
 } OptArgs;
+#endif
