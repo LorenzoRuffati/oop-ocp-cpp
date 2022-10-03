@@ -8,7 +8,7 @@ public:
         std::cout << "Creating sender" << std::endl;
     }
 
-    int execute(IPC* ipc){
+    int execute(IPC* ipc) final{
         std::cout << "Executing sender" << std::endl;
         size_t buff_s = ipc->buff_size();
         std::vector<byte> exvec{'a','b','c'};
@@ -16,9 +16,6 @@ public:
             ipc->send(exvec);
         }
         return 0;        
-    }
-    ~Sender(){
-        std::cout << "Destroying sender" << std::endl;
     }
 };
 

@@ -11,15 +11,15 @@ class MockIPC: public IPC{
             std::cout << "Creating IPC" << std::endl;
         }
 
-        size_t buff_size() override{
+        size_t buff_size() final{
             return 100;
         }
 
-        std::vector<byte> receive(size_t max_read) override{
+        std::vector<byte> receive(size_t max_read) final{
             throw NotImplemented();
         }
         
-        int send(std::vector<byte> payload) override{
+        int send(std::vector<byte> payload) final{
             std::cout << "Sending a vector " << payload.size() << " long" << std::endl;
             for (byte i: payload) {
                 std::cout << i;
@@ -29,13 +29,9 @@ class MockIPC: public IPC{
             return payload.size();
         }
 
-        int ready() override{
+        int ready() final{
             return reads>0;
         }
-        // Cleanup the resources and destroy the class
-        ~MockIPC() override{
-            std::cout << "Destroying IPC interface" << std::endl;
-        };
     
     private:
         int reads;

@@ -16,7 +16,7 @@ public:
     // receivers if there's data to be read
     virtual int ready() =0;
     // Cleanup the resources and destroy the class
-    virtual ~IPC(){}
+    virtual ~IPC() =default;
 };
 
 

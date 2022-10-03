@@ -6,7 +6,7 @@
 class Actor {
 public:
     virtual int execute(IPC* ipc)=0;
-    virtual ~Actor(){}
+    virtual ~Actor() =default;
 };
 
 class ActorFactory
