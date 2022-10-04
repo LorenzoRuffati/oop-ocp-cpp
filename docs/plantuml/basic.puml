@@ -1,0 +1,67 @@
+@startuml basic classes
+
+title C++ OCP
+
+abstract class Actor {
+  +int execute(IPC&)
+}
+
+abstract class IPC {
+  {abstract} +size_t buff_size()
+  {abstract} +vector<byte> receive(size_t)
+  {abstract} +int send(vector<byte>)
+  {abstract} +int ready()
+}
+
+
+class SharedMem{
+    -path_coord: string
+    -path_copy: string
+    -coord: unique_ptr<Coord>
+    -copy: unique_ptr<Copy>
+}
+class PipeRead{
+    -path: string
+    -buffer: vector<byte>
+}
+class PipeWrite{
+    -path: string
+    -buffer: vector<byte>
+}
+class MQRead {
+    -path: string
+    -buffer: vector<byte>
+    -tuple<type, vector<byte>> get_message()
+    -int messages_waiting()
+}
+class MQWrite {
+    -path: string
+    -buffer: vector<byte>
+}
+SharedMem --|> IPC
+PipeRead --|> IPC
+PipeWrite --|> IPC
+MQRead --|> IPC
+MQWrite --|> IPC
+
+class Sender{
+    -path_in: string
+}
+class Receiver{
+    -path_out: string
+}
+Sender --|> Actor
+Receiver --|> Actor
+
+class ActorFactory {
+  {static} +unique_ptr<Actor> create(Role, OptArgs&)
+}
+class IPCFactory {
+  {static} +unique_ptr<IPC> get_ipc(Method, Role, OptArgs&)
+}
+
+ActorFactory -[hidden] Actor
+IPCFactory -[hidden] IPC
+MQWrite -[hidden]- MQRead
+PipeWrite -[hidden]- PipeRead
+@enduml
