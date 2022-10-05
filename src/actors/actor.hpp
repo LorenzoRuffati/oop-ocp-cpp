@@ -1,8 +1,8 @@
 #ifndef ACTOR_H_DEF
 #define ACTOR_H_DEF
 #include <memory>
-#include "src/ipc/ipc.h"
-#include "src/utils/types.h"
+#include "src/ipc/ipc.hpp"
+#include "src/utils/types.hpp"
 
 class Actor {
 public:

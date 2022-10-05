@@ -1,5 +1,5 @@
 #include <iostream>
-#include "actor.h"
+#include "actor.hpp"
 
 
 class Sender: public Actor {

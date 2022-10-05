@@ -1,14 +1,17 @@
 #include <iostream>
 #include <memory>
-#include "help.h"
-#include "src/ipc/ipc.h"
-#include "src/actors/actor.h"
-#include "src/utils/types.h"
-#include "src/utils/utils.h"
+#include "help.hpp"
+#include "src/ipc/ipc.hpp"
+#include "src/actors/actor.hpp"
+#include "src/utils/types.hpp"
+#include "src/utils/utils.hpp"
 
 int main(int argc, char** argv) {
     std::cout << "Hello World! " << mult() << std::endl;
     ParsedRes parsed = ParsedRes(argc, argv);
+    if (!parsed.valid){
+        return -1;
+    }
 
     std::unique_ptr<Actor> actr = ActorFactory::create(parsed.role, parsed.optargs);
     std::unique_ptr<IPC> ipc = IPCFactory::get_ipc(parsed.method, parsed.role, parsed.optargs);

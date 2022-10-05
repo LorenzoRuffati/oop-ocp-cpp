@@ -1,7 +1,7 @@
 #ifndef UTILS_H_DEF
 #define UTILS_H_DEF
 #include <iostream>
-#include "src/utils/types.h"
+#include "src/utils/types.hpp"
 #include <boost/program_options.hpp>
 
 class ParsedRes

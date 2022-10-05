@@ -1,4 +1,6 @@
 #include "src/utils/utils.h"
+#include "src/utils/utils.hpp"
+
 
 ParsedRes::ParsedRes(int argc, char** argv)
 {

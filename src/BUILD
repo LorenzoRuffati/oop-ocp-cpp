@@ -2,9 +2,9 @@ cc_library(
     name = "helplib",
     srcs = [
         "help.cc",
-        "help.h",
+        "help.hpp",
     ],
-    hdrs = ["help.h"],
+    hdrs = ["help.hpp"],
     deps = [],
     visibility = [
         "//tests:__pkg__",
