@@ -7,3 +7,9 @@ services:
     stdin_open: true
     tty: true
     # Launch with docker-compose up -d, attach with docker-compose exec dev-env bash
+    # Where to go from here: persistent volume for bazel folders
+    volumes:
+      - cache:/root/.cache:rw # Works to keep the build cache between builds
+      - ./..:/proj:rw
+volumes:
+  cache:
