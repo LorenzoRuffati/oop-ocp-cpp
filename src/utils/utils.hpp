@@ -2,17 +2,19 @@
 #define UTILS_H_DEF
 #include <iostream>
 #include "src/utils/types.h"
+#include <boost/program_options.hpp>
+
 class ParsedRes
 {
 private:
     /* data */
 public:
     ParsedRes(int argc, char** argv);
-    ~ParsedRes();
 
     Role role;
     Method method;
     OptArgs optargs;
+    bool valid;
 };
 
 
