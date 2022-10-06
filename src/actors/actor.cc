@@ -68,5 +68,14 @@ class Receiver: public Actor {
 };
 
 std::unique_ptr<Actor> ActorFactory::create(Role role, OptArgs& args){
-    return std::unique_ptr<Actor>(new Sender(args));
+    switch (role){
+        case Role::sender:
+            return std::unique_ptr<Actor>(new Sender(args));
+            break;
+        case Role::receiver:
+            return std::unique_ptr<Actor>(new Receiver(args));
+            break;
+        default:
+            break;
+    }
 }

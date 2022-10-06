@@ -51,7 +51,10 @@ class MQRead: public IPC{
         std::string lock_name;
 
     public:
-        MQRead(Method Method, Role role, OptArgs& args){
+        MQRead(Method Method, Role role, OptArgs& args):
+            buffer_busy(false),
+            writer_finished(false)
+            {
             std::cout << "Create or open queue in read-only mode" << std::endl
                       << "Create a lock file to assert the reader is already here" << std::endl;
         }
@@ -62,18 +65,22 @@ class MQRead: public IPC{
 
         size_t buff_size() final {
             std::cout << "Query the message queue for the buffer size" << std::endl;
-
+            return 100;
         }
 
         /* Call after checking with ready(), will return a vector of bytes
          * Max read is equal to the return value of buff_size
          */
         std::vector<byte> receive(size_t max_read) final{
-            std::cout << "I can assume this is called when ready()" << std::endl
-                      << "If the buffer is full return the buffer" << std::endl
-                      << "If not read from the queue" << std::endl
-                      << "\t`writer_finished`: assign flag and read again" << std::endl
-                      << "\treturn" << std::endl;
+            if (!writer_finished){
+                std::cout << "I can assume this is called when ready()" << std::endl
+                        << "If the buffer is full return the buffer" << std::endl
+                        << "If not read from the queue" << std::endl
+                        << "\t`writer_finished`: assign flag and read again" << std::endl
+                        << "\treturn" << std::endl;
+                writer_finished = true;
+            }
+            return std::vector<byte>{'a','b'};
         }
 
         // Not implemented for receiver
@@ -92,6 +99,10 @@ class MQRead: public IPC{
                       << "\t   message, if it's a `writer_finished` message" << std::endl 
                       << "\t   return false, else true" << std::endl
                       << "\t2+: return true" << std::endl;
+            if (writer_finished){
+                return false;
+            }
+            return true;
         }
 };
 
