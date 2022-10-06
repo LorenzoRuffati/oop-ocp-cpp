@@ -12,6 +12,8 @@ class IPC {
 public:
     virtual size_t buff_size() =0;
     virtual std::vector<byte> receive(size_t max_read) =0;
+    // Send the vector, might block, if the vector is empty it'll take it as
+    // a sign that the copy process ended
     virtual int send(std::vector<byte>) =0;
     // For senders this will signal if we're ready to start sending, for 
     // receivers if there's data to be read

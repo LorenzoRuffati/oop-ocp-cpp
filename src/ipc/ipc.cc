@@ -21,11 +21,10 @@ class MockIPC: public IPC{
         
         int send(std::vector<byte> payload) final{
             std::cout << "Sending a vector " << payload.size() << " long" << std::endl;
-            for (byte i: payload) {
-                std::cout << i;
+            for (char i: payload) {
+                std::cout << i <<'.';
             }
             std::cout << std::endl;
-            reads -= 1;
             return payload.size();
         }
 
@@ -106,6 +105,7 @@ class MQWrite: public IPC{
 
         size_t buff_size() final {
             std::cout << "Query the message queue for the buffer size" << std::endl;
+            return 100;
         }
 
         std::vector<byte> receive(size_t max_read) final{
@@ -113,7 +113,11 @@ class MQWrite: public IPC{
         }
 
         int send(std::vector<byte> payload) final {
-            std::cout << "Blocking write on the queue" << std::endl;
+            if (payload.size() == 0){
+                std::cout << "Signal the queue that sending process is finished" << std::endl;
+            } else {
+                std::cout << "Blocking write on the queue" << std::endl;
+            }
         }
 
         bool ready() final {
@@ -122,5 +126,17 @@ class MQWrite: public IPC{
 };
 
 std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args){
+    if (method == Method::queue){
+        switch (role){
+        case Role::receiver :
+            return std::unique_ptr<IPC>(new MQRead(method, role, args));
+            break;
+        case Role::sender :
+            return std::unique_ptr<IPC>(new MQWrite(method, role, args));
+            break;
+        default:
+            break;
+        }
+    }
     return std::unique_ptr<IPC>(new MockIPC(args));
 }
