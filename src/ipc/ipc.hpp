@@ -15,7 +15,7 @@ public:
     virtual int send(std::vector<byte>) =0;
     // For senders this will signal if we're ready to start sending, for 
     // receivers if there's data to be read
-    virtual int ready() =0;
+    virtual bool ready() =0;
     // Cleanup the resources and destroy the class
     virtual ~IPC() =default;
 };
