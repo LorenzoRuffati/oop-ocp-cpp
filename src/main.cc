@@ -9,6 +9,7 @@
 int main(int argc, char** argv) {
     std::cout << "Hello World! " << mult() << std::endl;
     ParsedRes parsed = ParsedRes(argc, argv);
+    std::cout << parsed.optargs.filename << std::endl;
     if (!parsed.valid){
         return -1;
     }
