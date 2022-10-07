@@ -14,6 +14,7 @@ enum class Method {
 
 typedef struct {
     std::string filename;
+    std::string passwd;
     //    
 } OptArgs;
 #endif

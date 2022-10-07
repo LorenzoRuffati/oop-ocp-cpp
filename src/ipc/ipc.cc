@@ -2,8 +2,6 @@
 #include "ipc.hpp"
 #include "src/utils/utils.hpp"
 
-
-
 class MockIPC: public IPC{
     public:
         MockIPC(OptArgs& args):
@@ -38,35 +36,70 @@ class MockIPC: public IPC{
 };
 
 MQRead::MQRead(Method Method, Role role, OptArgs& args):
+    buffer(2048),
     buffer_busy(false),
-    writer_finished(false)
-    {
-    std::cout << "Create or open queue in read-only mode" << std::endl
-                << "Create a lock file to assert the reader is already here" << std::endl;
+    writer_finished(false),
+    buffs(2048){
+    queue_name = "/" + args.passwd;
+    lock_name = "/tmp/ocp.mq." + args.passwd + ".lock";
+
+    auto op_l = open(&lock_name[0], O_CREAT | O_EXCL, 0660);
+    if (op_l == -1){
+        if (errno == EEXIST){
+            std::cout << lock_name << " exists, if the previous process crashed" 
+            << "run the cleaner" << std::endl;
+        }
+        throw FileError();
+    }
+    close(op_l); // I don't need it open
+
+    struct mq_attr attr;
+    attr.mq_msgsize = 2048;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = 5;
+    mqd = mq_open(&queue_name[0], O_CREAT | O_RDONLY, 0660, &attr);
+
+    if (mqd == (mqd_t) -1){
+        throw FileError();
+    }
 }
 
 MQRead::~MQRead(){
-    std::cout << "Delete queue and lockfile" << std::endl;
+    unlink(&lock_name[0]);
+    mq_close(mqd);
+    mq_unlink(&queue_name[0]);
 }
 
 size_t MQRead::buff_size(){
-    std::cout << "Query the message queue for the buffer size" << std::endl;
-    return 100;
+    struct mq_attr attr;
+    auto r = mq_getattr(mqd, &attr);
+    if (r!= 0){ throw OwnError();}
+    buffs = attr.mq_msgsize;
+    return buffs;
 }
 
 /* Call after checking with ready(), will return a vector of bytes
     * Max read is equal to the return value of buff_size
     */
 std::vector<byte> MQRead::receive(size_t max_read){
-    if (!writer_finished){
-        std::cout << "I can assume this is called when ready()" << std::endl
-                << "If the buffer is full return the buffer" << std::endl
-                << "If not read from the queue" << std::endl
-                << "\t`writer_finished`: assign flag and read again" << std::endl
-                << "\treturn" << std::endl;
-        writer_finished = true;
+    if (buffer_busy){
+        std::vector<byte> retv = buffer;
+        buffer_busy = false;
+        return retv;
     }
-    return std::vector<byte>{'a','b'};
+    std::vector<byte> scratch(buffs), retvec(buffs);
+    unsigned int prio = 0;
+    auto r = mq_receive(mqd, (char*)scratch.data(), buffs, &prio);
+    if (r==-1){throw OwnError();}
+    if (prio != 0){
+        writer_finished = true;
+        r = mq_receive(mqd, (char*)scratch.data(), buffs, &prio);
+        if (r==-1){throw OwnError();}
+        if (prio != 0){ throw OwnError();}
+    }
+
+    std::copy_n(scratch.data(), r, std::back_inserter(retvec));
+    return retvec;
 }
 
 // Not implemented for receiver
@@ -78,17 +111,38 @@ bool MQRead::send(std::vector<byte> payload){
     * process can shut down
     */
 bool MQRead::ready(){
-    std::cout << "Check if there's content in the buffer, if so return true" << std::endl
-                << "If not check how many messages" << std::endl
-                << "\t0: if `writer_finished` return false, else true" << std::endl
-                << "\t1: if `writer_finished` return true, else read the"<< std::endl 
-                << "\t   message, if it's a `writer_finished` message" << std::endl 
-                << "\t   return false, else true" << std::endl
-                << "\t2+: return true" << std::endl;
-    if (writer_finished){
-        return false;
+    if (buffer_busy){
+        return true;
     }
-    return true;
+    struct mq_attr attr;
+    auto r_at = mq_getattr(mqd, &attr);
+    if (r_at!= 0){ throw OwnError();}
+
+    if (attr.mq_curmsgs >= 2){
+        return true;
+    }
+
+    if (attr.mq_curmsgs == 0){
+        return !writer_finished;
+    }
+
+    if (writer_finished){
+        return attr.mq_curmsgs > 0;
+    }
+
+    // Here I can assume exactly one message and writer still active as far as I know
+    std::vector<byte> scratch(buffs);
+    unsigned int prio;
+    auto rr = mq_receive(mqd, (char*)scratch.data(), buffs, &prio);
+    if (rr==-1){throw OwnError();}
+    if (prio != 0){
+        writer_finished = true;
+        return false;
+    } else {
+        std::copy_n(scratch.data(), rr, std::back_inserter(buffer));
+        buffer_busy = true;
+        return true;
+    }
 }
 
 MQWrite::MQWrite(Method Method, Role role, OptArgs& args){

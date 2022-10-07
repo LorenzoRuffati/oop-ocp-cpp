@@ -1,6 +1,7 @@
 #ifndef UTILS_H_DEF
 #define UTILS_H_DEF
 #include <iostream>
+#include <errno.h>
 #include "src/utils/types.hpp"
 #include <boost/program_options.hpp>
 
@@ -18,8 +19,13 @@ public:
 };
 
 
-class NotImplemented : public std::exception {
+class OwnError : public std::exception {};
+
+class NotImplemented : public OwnError {
     public:
         char * what ();
 };
+
+class FileError: public OwnError {};
+
 #endif

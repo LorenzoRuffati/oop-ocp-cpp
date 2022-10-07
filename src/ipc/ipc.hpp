@@ -45,6 +45,8 @@ class MQRead: public IPC{
         bool writer_finished;
         std::string queue_name;
         std::string lock_name;
+        mqd_t mqd;
+        size_t buffs;
     public:
         MQRead(Method Method, Role role, OptArgs& args);
         ~MQRead();
