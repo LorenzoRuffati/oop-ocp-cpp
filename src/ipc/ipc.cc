@@ -19,7 +19,7 @@ class MockIPC: public IPC{
             throw NotImplemented();
         }
         
-        int send(std::vector<byte> payload) final{
+        bool send(std::vector<byte> payload) final{
             std::cout << "Sending a vector " << payload.size() << " long" << std::endl;
             for (char i: payload) {
                 std::cout << i <<'.';

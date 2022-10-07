@@ -22,22 +22,22 @@ Same as sender, for both a full suite of tests with interesting inputs should be
     + send after empty (should fail)
 
 ## Queue-reader
-+ [ ] Creation:
++ [x] Creation:
     + pre-existing
     + no queue
     + second reader
-+ [ ] Ready:
-    + no writer_finished:
-        + 0 message => true
++ [x] Ready:
+    + [x] no writer_finished:
+        + 0 message => true (tested during creation)
         + 1 message (writer_finished) => false
-        + 1 message (normal) => true
+        + 1 message (normal) => true (tested during creation)
         + 2 messages (mixed) => true
-    + writer_finished:
+    + [x] writer_finished: 
         + 0 => false
         + 1+ => true
-    + updated from "receive" (send two messages, check ready, receive, again check ready)
-+ [ ] Receive:
+    + [x] updated from "receive" (send two messages, check ready, receive, again check ready)
++ [x] Receive:
     + from buffer (reuse setup from 1 message normal)
     + first message is writer_finished
-    + full
-    + partial
+    + full (from second)
+    + partial (from first)

@@ -43,3 +43,20 @@ std::vector<byte> write_random(size_t num){
     generate(begin(vec), end(vec), gen);
     return vec;
 }
+
+void send_bytes_to_queue(std::vector<byte> msg, mqd_t descr){
+    mq_send(descr, (char*)&msg[0], msg.size(), 0);
+}
+
+
+TEST_F(QueuePreexist, sanitycheck){
+    std::string test = "Hello world";
+    int r = mq_send(descr, &test[0], test.length(), 0);
+    ASSERT_EQ(r, 0);
+}
+
+TEST_F(QueueHasMessages, sanitycheck){
+    struct mq_attr attr{0};
+    mq_getattr(descr, &attr);
+    ASSERT_EQ(attr.mq_curmsgs, 1);
+}

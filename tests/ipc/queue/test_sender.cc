@@ -1,18 +1,4 @@
 #include "common.hpp"
-#include <gtest/gtest.h>
-
-
-TEST_F(QueuePreexist, test1){
-    std::string test = "Hello world";
-    int r = mq_send(descr, &test[0], test.length(), 0);
-    ASSERT_EQ(r, 0);
-}
-
-TEST_F(QueueHasMessages, checknumber){
-    struct mq_attr attr{0};
-    mq_getattr(descr, &attr);
-    ASSERT_EQ(attr.mq_curmsgs, 1);
-}
 
 TEST(QueueNotExist, CreateSender){
     try
@@ -118,7 +104,7 @@ TEST_F(QueuePreexist, sendemptybuff){
     ASSERT_TRUE(r);
     buff.reserve(buff_s*2);
     unsigned int prio = 0;
-    size_t nr = mq_receive(descr, (char*)buff.data(), buff_s, &prio);
+    mq_receive(descr, (char*)buff.data(), buff_s, &prio);
     EXPECT_GT(prio, 0);
 }
 
