@@ -5,7 +5,7 @@ TEST(QueueNotExist, CreateReceiver){
     {
         OptArgs args;
         args.filename = std::string{"/test_queue"};
-        auto mq = MQWrite(Method::queue, Role::receiver, args);
+        auto mq = MQRead(Method::queue, Role::receiver, args);
         ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
     }
     catch(const std::exception& e)
@@ -19,7 +19,7 @@ TEST_F(QueuePreexist, CreateReceiver){
     {
         OptArgs args;
         args.filename = path;
-        auto mq = MQWrite(Method::queue, Role::receiver, args);
+        auto mq = MQRead(Method::queue, Role::receiver, args);
         ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
     }
     catch(const std::exception& e)
@@ -33,7 +33,7 @@ TEST_F(QueueHasMessages, CreateReceiver){
     {
         OptArgs args;
         args.filename = path;
-        auto mq = MQWrite(Method::queue, Role::receiver, args);
+        auto mq = MQRead(Method::queue, Role::receiver, args);
         ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
     }
     catch(const std::exception& e)
@@ -47,7 +47,7 @@ TEST_F(QueuePreexist, readywriterfinmsg){
     mq_send(descr, &rando_high_prio[0], rando_high_prio.size(), 1);
     OptArgs args;
     args.filename = path;
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     ASSERT_FALSE(mq.ready()) << "Expected false upon having only one message which has high priority";
 }
 
@@ -56,7 +56,7 @@ TEST_F(QueueHasMessages, readymultiplemsgs){
     mq_send(descr, &rando_high_prio[0], rando_high_prio.size(), 1);
     OptArgs args;
     args.filename = path;
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     ASSERT_TRUE(mq.ready()) << "Expected true when having more than one message";
 }
 
@@ -65,7 +65,7 @@ TEST_F(QueuePreexist, readynomsgfin){
     mq_send(descr, &rando_high_prio[0], rando_high_prio.size(), 1);
     OptArgs args;
     args.filename = path;
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     ASSERT_FALSE(mq.ready());
     ASSERT_FALSE(mq.ready()) << "Expected false";
 }
@@ -76,7 +76,7 @@ TEST_F(QueueHasMessages, readymsgfin){
     mq_send(descr, &rando_high_prio[0], rando_high_prio.size(), 1);
     OptArgs args;
     args.filename = path;
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     auto r = mq.ready();
     ASSERT_TRUE(r);
     mq.receive(mq.buff_size());
@@ -88,7 +88,7 @@ TEST_F(QueueHasMessages, updtmsgfinfrmrcv){
     OptArgs args;
     args.filename = path;
 
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     auto r = mq.ready();
     ASSERT_TRUE(r);
     
@@ -104,7 +104,7 @@ TEST_F(QueuePreexist, frombuff){
     OptArgs args;
     args.filename = path;
 
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     size_t buffs = mq.buff_size();
 
     src = write_random(buffs-1);
@@ -121,7 +121,7 @@ TEST_F(QueuePreexist, firstisendmsg){
     OptArgs args;
     args.filename = path;
 
-    auto mq = MQWrite(Method::queue, Role::receiver, args);
+    auto mq = MQRead(Method::queue, Role::receiver, args);
     size_t buffs = mq.buff_size();
 
     src = write_random(buffs);
