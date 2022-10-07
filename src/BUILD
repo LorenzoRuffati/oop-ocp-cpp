@@ -11,6 +11,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "lib_ocp",
+    srcs = glob(["**/*.cc", "**/*.hpp"]),
+    hdrs = glob(["**/*.hpp"]),
+    deps = [":helplib", "@boost//:program_options"],
+    visibility = [
+        "//tests:__pkg__"
+    ],
+)
+
 cc_binary(
     name = "src",
     srcs = glob(["**/*.cc", "**/*.hpp"]),
