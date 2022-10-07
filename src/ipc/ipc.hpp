@@ -3,6 +3,10 @@
 #include <cstddef>
 #include <vector>
 #include <memory>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <mqueue.h>
+#include <errno.h>
 
 #include "src/utils/types.hpp"
 using byte = unsigned char;
@@ -14,7 +18,7 @@ public:
     virtual std::vector<byte> receive(size_t max_read) =0;
     // Send the vector, might block, if the vector is empty it'll take it as
     // a sign that the copy process ended
-    virtual int send(std::vector<byte>) =0;
+    virtual bool send(std::vector<byte>) =0;
     // For senders this will signal if we're ready to start sending, for 
     // receivers if there's data to be read
     virtual bool ready() =0;
@@ -53,7 +57,7 @@ class MQRead: public IPC{
         std::vector<byte> receive(size_t max_read) final;
 
         // Not implemented for receiver
-        int send(std::vector<byte> payload) final;
+        bool send(std::vector<byte> payload) final;
 
         /* Returns true if messages are still expected, if false the reader 
          * process can shut down
@@ -69,7 +73,7 @@ class MQWrite: public IPC{
 
         std::vector<byte> receive(size_t max_read) final;
 
-        int send(std::vector<byte> payload) final;
+        bool send(std::vector<byte> payload) final;
 
         bool ready() final;
 };

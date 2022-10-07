@@ -11,11 +11,11 @@ Same as sender, for both a full suite of tests with interesting inputs should be
 + [ ] Test missing arguments
 
 ## Queue-writer (sends data)
-+ [ ] Creation: 
++ [x] Creation: 
     + pre-existing
     + no queue
     + Already with messages
-+ [ ] Send:
++ [x] Send:
     + Full buffer
     + Partial buffer
     + Empty buffer (should send an higher priority message end)

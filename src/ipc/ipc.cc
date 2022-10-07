@@ -70,7 +70,7 @@ std::vector<byte> MQRead::receive(size_t max_read){
 }
 
 // Not implemented for receiver
-int MQRead::send(std::vector<byte> payload){
+bool MQRead::send(std::vector<byte> payload){
     throw NotImplemented();
 }
 
@@ -105,7 +105,7 @@ std::vector<byte> MQWrite::receive(size_t max_read){
     throw NotImplemented();
 }
 
-int MQWrite::send(std::vector<byte> payload){
+bool MQWrite::send(std::vector<byte> payload){
     if (payload.size() == 0){
         std::cout << "Signal the queue that sending process is finished" << std::endl;
     } else {
