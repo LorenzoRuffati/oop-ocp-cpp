@@ -26,6 +26,7 @@ class NotImplemented : public OwnError {
         char * what ();
 };
 
-class FileError: public OwnError {};
+class FileError: public OwnError {
+};
 
 #endif

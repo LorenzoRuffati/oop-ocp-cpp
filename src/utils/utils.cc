@@ -6,6 +6,9 @@ void on_filename(std::string name){
     std::cout << "Got filename: " << name << std::endl;
 }
 
+void validate_pass(std::string passwd){
+}
+
 ParsedRes::ParsedRes(int argc, char** argv)
 {
     try{
@@ -18,6 +21,7 @@ ParsedRes::ParsedRes(int argc, char** argv)
         //("pi", po::value<float>()->default_value(3.14f), "Pi")
         ("file,f", po::value< std::string >()->notifier(on_filename), "Filename")    
         //("email", po::value< std::vector<std::string> >()->composing(), "email")
+        ("pass,p", po::value<std::string>()->notifier(validate_pass), "A string (which is a valid file basename) used for coordination between sender and receiver")
         ;
 
         po::variables_map vm;
@@ -40,13 +44,22 @@ ParsedRes::ParsedRes(int argc, char** argv)
             } else if (vm.count("sender")){
                 role = Role::sender;
             }
-            
+
             optargs = (OptArgs){};
-            optargs.filename = vm["file"].as<std::string>();
+            if ((vm.count("pass")== 0) || (vm.count("file") == 0)){
+                valid = false;
+            } else {
+                optargs.filename = vm["file"].as<std::string>();
+                optargs.passwd = vm["pass"].as<std::string>();
+            }
+            
         }
     }
     catch (const po::error &ex){
         std::cerr << ex.what() << '\n';
+    }
+    catch (const OwnError &oer){
+        valid = false;
     }
 }
 

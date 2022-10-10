@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include "actor.hpp"
+#include "src/utils/utils.hpp"
 
 
 class Sender: public Actor {
@@ -62,8 +63,9 @@ class Receiver: public Actor {
             std::vector<byte> bytes;
             while (ipc.ready()){
                 bytes = ipc.receive(buff_size);
-                //out_stream << bytes.;
+                out_stream.write((char*)bytes.data(), bytes.size());
             }
+            return 0;
         }
 };
 
@@ -78,4 +80,5 @@ std::unique_ptr<Actor> ActorFactory::create(Role role, OptArgs& args){
         default:
             break;
     }
+    throw OwnError();
 }
