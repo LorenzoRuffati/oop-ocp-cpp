@@ -1,0 +1,80 @@
+@startuml Queue_receiver
+!pragma teoz true
+
+title "Queue receiver behaviour"
+participant "IPC-receiver" as IR
+entity Queue as Q
+
+alt queue does not exist
+IR -> Q **
+end
+
+IR -> Q ++: Open read
+IR -> Q: Get info
+IR <-- Q: info
+|||
+
+group buff size
+?-> IR ++: Max message size?
+IR -> Q ++: stat
+return info
+IR -> IR ++: Extract buffer size
+deactivate IR
+return size
+end
+
+group Ready
+[->IR ++: Ready?
+  alt has_finished
+    IR -> Q ++: has messages?
+    return answer
+    alt yes
+      IR -> IR
+      ?<-- IR: true
+    else no
+      IR -> IR
+      ?<-- IR: false
+    end
+  else has not finished
+    IR -> Q ++: get message
+    note right: Will block
+    return message
+    IR -> IR: which type
+    
+    alt has_fin_notification
+      IR -> Q ++: has messages?
+      return bool
+      ?<-- IR: bool
+    else normal_message
+      IR -> IR: store in buffer
+      ?<-- IR: true
+    end
+    
+    deactivate IR
+  end
+end
+
+group Receive
+  ?-> IR ++: receive
+  alt buffer has message
+    IR -> IR: get message
+  else buffer is empty
+    IR -> Q++: get_message
+    return message
+  end
+  return message
+end
+
+group Send
+?->IR
+note right: Not Implemented
+end
+
+group Teardown
+?->IR ++: Destroy
+IR -> Q !!: 
+return
+
+end
+
+@enduml

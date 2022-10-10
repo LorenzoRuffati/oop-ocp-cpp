@@ -1,0 +1,57 @@
+@startuml Queue_send
+!pragma teoz true
+
+title "Queue sender behaviour"
+participant "IPC-sender" as IS
+entity Queue as Q
+
+alt queue does not exist
+IS -> Q **
+end
+
+IS -> Q ++: Open write
+IS -> Q: Get info
+IS <-- Q: info
+|||
+
+group buff size
+?-> IS ++: Max message size?
+IS -> Q ++: stat
+return info
+IS -> IS ++: Extract buffer size
+deactivate IS
+return size
+end
+
+group Ready
+?-> IS ++: Is ready?
+IS -> Q ++: has reader?
+return
+return bool
+end
+
+group Send
+?-> IS ++: Send data
+IS -> Q ++: write(data)
+note right: Will block if the\nqueue is full
+return status code
+IS -> IS ++: Check result
+deactivate IS
+return ret_code
+end
+
+group Receive
+?->IS
+note right: Not Implemented
+end
+
+group Teardown
+?->IS ++: Destroy
+IS -> Q ++: Send end of transmission message
+return
+note right: Will block if queue full
+return
+
+end
+
+@enduml

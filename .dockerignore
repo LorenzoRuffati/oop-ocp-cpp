@@ -1,0 +1,4 @@
+/test_env
+/.vscode
+/bazel*
+/external
