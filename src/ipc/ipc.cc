@@ -87,7 +87,9 @@ std::vector<byte> MQRead::receive(size_t max_read){
         buffer_busy = false;
         return retv;
     }
-    std::vector<byte> scratch(buffs), retvec(buffs);
+    std::vector<byte> scratch, retvec;
+    scratch.reserve(buffs);
+    retvec.reserve(buffs);
     unsigned int prio = 0;
     auto r = mq_receive(mqd, (char*)scratch.data(), buffs, &prio);
     if (r==-1){throw OwnError();}
@@ -97,7 +99,6 @@ std::vector<byte> MQRead::receive(size_t max_read){
         if (r==-1){throw OwnError();}
         if (prio != 0){ throw OwnError();}
     }
-
     std::copy_n(scratch.data(), r, std::back_inserter(retvec));
     return retvec;
 }
@@ -139,6 +140,7 @@ bool MQRead::ready(){
         writer_finished = true;
         return false;
     } else {
+        buffer.clear();
         std::copy_n(scratch.data(), rr, std::back_inserter(buffer));
         buffer_busy = true;
         return true;
