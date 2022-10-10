@@ -29,16 +29,13 @@ class Sender: public Actor {
                 in_stream.read((char*)buff.data(), buff_s);
                 std::copy_n(buff.data(), in_stream.gcount(), std::back_inserter(vectr));
                 if (in_stream){
-                    std::cout << "Read full\n";
                     // Read all characters
                 } else if (in_stream.eof()){
                     // Read only some bytes
-                    std::cout << "Read some "<< "\n";
                     finished = true;
                 } else {
                     throw std::exception();
                 }
-                std::cout << vectr.size() << std::endl;
                 ipc.send(vectr);
                 vectr.clear();
             }
