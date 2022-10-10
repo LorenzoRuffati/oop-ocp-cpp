@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "src/ipc/ipc.hpp"
 
+using namespace MQ;
 
 class QueuePreexist: public ::testing::Test {
     protected:
