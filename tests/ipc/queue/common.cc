@@ -12,7 +12,8 @@ void QueuePreexist::SetUp(){
     attr.mq_maxmsg = 10;
     attr.mq_flags = 0;
 
-    path = std::string("/test_queue");
+    passwd = std::string("test_queue");
+    std::string path = "/" + passwd;
     descr = mq_open(&path[0], O_CREAT | O_RDWR, 0660, &attr);
 }
 

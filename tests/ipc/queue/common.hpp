@@ -7,6 +7,7 @@
 
 class QueuePreexist: public ::testing::Test {
     protected:
+        std::string passwd;
         std::string path;
         mqd_t descr;
 
