@@ -19,24 +19,29 @@ class SharedMem{
     -path_copy: string
     -coord: unique_ptr<Coord>
     -copy: unique_ptr<Copy>
+    +SharedMem(Method, Role, OptArgs&)
 }
 class PipeRead{
     -path: string
     -buffer: vector<byte>
+    +PipeRead(Method, Role, OptArgs&)
 }
 class PipeWrite{
     -path: string
     -buffer: vector<byte>
+    +PipeWrite(Method, Role, OptArgs&)
 }
 class MQRead {
     -path: string
     -buffer: vector<byte>
     -tuple<type, vector<byte>> get_message()
     -int messages_waiting()
+    +MQRead(Method, Role, OptArgs&)
 }
 class MQWrite {
     -path: string
     -buffer: vector<byte>
+    +MQWrite(Method, Role, OptArgs&)
 }
 SharedMem --|> IPC
 PipeRead --|> IPC
