@@ -19,6 +19,7 @@ class QueuePreexist: public ::testing::Test {
 class QueueHasMessages: public QueuePreexist {
     protected:
         void SetUp() override;
+        void TearDown() override;
 };
 
 std::vector<byte> write_random(size_t num);

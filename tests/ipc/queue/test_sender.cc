@@ -4,7 +4,8 @@ TEST(QueueNotExist, CreateSender){
     try
     {
         OptArgs args;
-        args.filename = std::string{"/test_queue"};
+        args.passwd= "password";
+        args.filename = "/tmp/rando.txt";
         auto mq = MQWrite(Method::queue, Role::sender, args);
         ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
     }
@@ -18,7 +19,8 @@ TEST_F(QueuePreexist, CreateSender){
     try
     {
         OptArgs args;
-        args.filename = path;
+        args.passwd = passwd;
+        args.filename = "/tmp/rando.txt";
         auto mq = MQWrite(Method::queue, Role::sender, args);
         ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
     }
@@ -32,7 +34,8 @@ TEST_F(QueueHasMessages, CreateSender){
     try
     {
         OptArgs args;
-        args.filename = path;
+        args.passwd = passwd;
+        args.filename = "/tmp/rando.txt";
         MQWrite(Method::queue, Role::sender, args);
         FAIL() << "Accessing as a writer a queue with messages must be an error" ;
     }
@@ -46,7 +49,8 @@ TEST_F(QueueHasMessages, CreateSender){
 
 TEST_F(QueuePreexist, sendfullbuff){
     OptArgs args;
-    args.filename = path;
+    args.passwd = passwd;
+    args.filename = "/tmp/rando.txt";
     auto mq = MQWrite(Method::queue, Role::sender, args);
     ASSERT_TRUE(mq.ready());
     size_t buff_s = mq.buff_size();
@@ -70,7 +74,8 @@ TEST_F(QueuePreexist, sendfullbuff){
 
 TEST_F(QueuePreexist, sendpartialbuff){
     OptArgs args;
-    args.filename = path;
+    args.passwd = passwd;
+    args.filename = "/tmp/rando.txt";
     auto mq = MQWrite(Method::queue, Role::sender, args);
     ASSERT_TRUE(mq.ready());
     size_t buff_s = mq.buff_size();
@@ -94,7 +99,8 @@ TEST_F(QueuePreexist, sendpartialbuff){
 
 TEST_F(QueuePreexist, sendemptybuff){
     OptArgs args;
-    args.filename = path;
+    args.passwd = passwd;
+    args.filename = "/tmp/rando.txt";
     auto mq = MQWrite(Method::queue, Role::sender, args);
     ASSERT_TRUE(mq.ready());
     size_t buff_s = mq.buff_size();
@@ -110,7 +116,8 @@ TEST_F(QueuePreexist, sendemptybuff){
 
 TEST_F(QueuePreexist, sendafterempty){
     OptArgs args;
-    args.filename = path;
+    args.passwd = passwd;
+    args.filename = "/tmp/rando.txt";
     auto mq = MQWrite(Method::queue, Role::sender, args);
     ASSERT_TRUE(mq.ready());
     size_t buff_s = mq.buff_size();

@@ -18,15 +18,19 @@ void QueuePreexist::SetUp(){
 }
 
 void QueuePreexist::TearDown(){
+    std::string path = "/" + passwd;
     mq_close(descr);
     mq_unlink(&path[0]);
-    //std::cout << "Destroying queue " << path << std::endl;
 }
 
 void QueueHasMessages::SetUp(){
     QueuePreexist::SetUp();
     std::string test = "Hello world";
     mq_send(descr, &test[0], test.length(), 0);
+}
+
+void QueueHasMessages::TearDown(){
+    QueuePreexist::TearDown();
 }
 
 std::vector<byte> write_random(size_t num){
@@ -58,6 +62,7 @@ TEST_F(QueuePreexist, sanitycheck){
 
 TEST_F(QueueHasMessages, sanitycheck){
     struct mq_attr attr{0};
-    mq_getattr(descr, &attr);
+    int r = mq_getattr(descr, &attr);
+    ASSERT_EQ(r, 0);
     ASSERT_EQ(attr.mq_curmsgs, 1);
 }
