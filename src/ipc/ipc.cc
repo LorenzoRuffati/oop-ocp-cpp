@@ -147,14 +147,35 @@ bool MQRead::ready(){
     }
 }
 
-MQWrite::MQWrite(Method Method, Role role, OptArgs& args){
-    std::cout << "Create or access the queue, " << std::endl
-                << "If the queue is not empty fail" << std::endl;
+MQWrite::MQWrite(Method Method, Role role, OptArgs& args): finished(false){
+    queue_name = "/" + args.passwd;
+
+    struct mq_attr attr;
+    attr.mq_msgsize = 2048;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = 5;
+    mqd = mq_open(&queue_name[0], O_CREAT | O_WRONLY, 0660, &attr);
+
+    if (mqd == (mqd_t) -1){
+        throw FileError();
+    }
+    auto r = mq_getattr(mqd, &attr);
+    if (r!=0){
+        throw OwnError();
+    }
+    if (attr.mq_curmsgs != 0){
+        throw FileError();
+    }
 }
 
 size_t MQWrite::buff_size(){
-    std::cout << "Query the message queue for the buffer size" << std::endl;
-    return 100;
+    struct mq_attr attr;
+    auto r = mq_getattr(mqd, &attr);
+    if (r!=0){
+        throw OwnError();
+    }
+    buffs = attr.mq_msgsize;
+    return buffs;
 }
 
 std::vector<byte> MQWrite::receive(size_t max_read){
@@ -162,15 +183,20 @@ std::vector<byte> MQWrite::receive(size_t max_read){
 }
 
 bool MQWrite::send(std::vector<byte> payload){
-    if (payload.size() == 0){
-        std::cout << "Signal the queue that sending process is finished" << std::endl;
-    } else {
-        std::cout << "Blocking write on the queue" << std::endl;
+    if (not ready()){
+        return false;
     }
+    unsigned int prio = 0;
+    if (payload.size() == 0){
+        prio = 1;
+        finished = true;
+    }
+    int r = mq_send(mqd, (char*)payload.data(), payload.size(), prio);
+    return r == 0;
 }
 
 bool MQWrite::ready(){
-    std::cout << "Return true (possibly implement checks on the message queue health" << std::endl;
+    return !finished;
 }
 
 std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args){

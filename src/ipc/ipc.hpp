@@ -68,6 +68,12 @@ class MQRead: public IPC{
 };
 
 class MQWrite: public IPC{
+    private:
+        std::string queue_name;
+        mqd_t mqd;
+        size_t buffs;
+        bool finished;
+
     public:
         MQWrite(Method Method, Role role, OptArgs& args);
 
