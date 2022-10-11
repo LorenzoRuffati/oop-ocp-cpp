@@ -1,5 +1,6 @@
 #ifndef TYPES_H_DEF
 #define TYPES_H_DEF
+#include <string>
 enum class Role {
     sender,
     receiver,
