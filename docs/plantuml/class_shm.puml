@@ -1,0 +1,80 @@
+@startuml shm_class
+!pragma teoz true
+title "Shared memory class diagram"
+
+class SemInfo {}
+
+class SHMSend {
+  - coord_sem_info: SemInfo
+  - coord: Coord*
+  - copy: Copy*
+  - current: int
+  - wrote_flag: bool
+  + SHMSend(string, size_t, int)
+  + size_t buff_size()
+  + size_t send(vector<byte>)
+  + bool ready()
+}
+
+class SHMRecv {
+  - coord_sem_info: SemInfo
+  - coord: Coord
+  - copy: Copy
+  - current: int
+  - finished: bool
+  - read_flag: bool
+  + SHMRecv(string)
+  + size_t buff_size()
+  + vector<byte> receive(size_t)
+  + bool ready()
+}
+
+class Coord {
+  - copy_size: size_t
+  - copy_path: string
+  + Coord(size_t, int)
+}
+
+class Copy  {
+  - width: size_t
+  - var: CondVar
+  - locks[2]: rwlock
+  - buffer[2]
+  + vector<bytes> read(int)
+  + bool lock_next(int)
+  + size_t size_chunk(int)
+  + Copy(size_t, int)
+}
+
+() sem_coord_file as scrd
+() sem_copy_file as scp
+
+class CondVar {
+  - lock: mutex
+  - var: int
+  - condition: condvar
+  + void wait_until(int)
+  + void change(int)
+  + Condvar(int)
+}
+
+note as N1
+I will not have Flexible array member 
+so I might as well merge Coord and
+Copy since I anyway need to manually
+create the array (placement new I guess)
+end note
+
+SHMSend *-- scrd
+SHMSend *-- scp
+SHMRecv o-- scrd
+SHMRecv o-- scp
+
+SHMSend *-- Coord
+SHMSend *-- Copy
+SHMRecv *-- Coord
+SHMRecv *-- Copy
+
+Copy *-- CondVar
+
+@enduml

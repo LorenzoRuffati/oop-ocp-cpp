@@ -9,8 +9,8 @@ abstract class Actor {
 abstract class IPC {
   {abstract} +size_t buff_size()
   {abstract} +vector<byte> receive(size_t)
-  {abstract} +int send(vector<byte>)
-  {abstract} +int ready()
+  {abstract} +size_t send(vector<byte>)
+  {abstract} +bool ready()
 }
 
 
