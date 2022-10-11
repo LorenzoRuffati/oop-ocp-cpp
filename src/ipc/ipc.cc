@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ipc.hpp"
-#include "src/utils/utils.hpp"
 #include "shm.hpp"
+#include "src/utils/utils.hpp"
 
 class MockIPC: public IPC{
     public:

@@ -39,6 +39,7 @@ class Sender: public Actor {
                 ipc.send(vectr);
                 vectr.clear();
             }
+            buff.clear();
             ipc.send(buff); // Sending an empty buffer to signal that the process ended
             return 0;        
         }
