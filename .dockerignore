@@ -2,3 +2,4 @@
 /.vscode
 /bazel*
 /external
+/.gdb_history
