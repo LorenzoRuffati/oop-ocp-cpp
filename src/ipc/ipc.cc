@@ -92,7 +92,7 @@ namespace MQ { // Handles queue IPC method
         std::vector<byte> scratch, retvec;
         scratch.reserve(buffs);
         retvec.reserve(buffs);
-        unsigned int prio = 0;
+        unsigned int prio;
         auto r = mq_receive(mqd, (char*)scratch.data(), buffs, &prio);
         if (r==-1){throw OwnError();}
         if (prio != 0){
@@ -123,10 +123,6 @@ namespace MQ { // Handles queue IPC method
 
         if (attr.mq_curmsgs >= 2){
             return true;
-        }
-
-        if (attr.mq_curmsgs == 0){
-            return !writer_finished;
         }
 
         if (writer_finished){
@@ -206,6 +202,8 @@ using namespace MQ;
 using namespace SHM;
 
 std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args){
+    std::cout << "IPC factory" << std::endl;
+    std::cout << method_repr(method) << " " << role_repr(role) << std::endl;
     switch (method){
         case Method::queue:
             switch (role){

@@ -49,3 +49,13 @@ cc_test(
     "//src:lib_ocp"
   ]
 )
+
+cc_test(
+  name = "shm-send",
+  size = "small",
+  srcs = ["ipc/shm/test_sender.cc", "ipc/shm/common.cc"] + glob(["ipc/shm/*.hpp"]),
+  deps = [
+    "@com_google_googletest//:gtest_main",
+    "//src:lib_ocp"
+  ]
+)

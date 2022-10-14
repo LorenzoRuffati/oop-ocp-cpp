@@ -11,31 +11,101 @@ namespace SHM{
     }
 
     size_t ShmSender::buff_size(){
-
+        return coord->width;
     }
 
     std::vector<byte> ShmSender::receive(size_t max_read){
-
+        throw NotImplemented();
     }
 
     // Send the vector, might block, if the vector is empty it'll take it as
     // a sign that the copy process ended
-    bool ShmSender::send(std::vector<byte>){
-
+    bool ShmSender::send(std::vector<byte> src){
+        if (!first_send){
+            pthread_rwlock_wrlock(&(coord->lcs_active[idx]));
+            pthread_rwlock_unlock(&(coord->lcs_leaving[!idx]));
+        }
+        std::copy(src.begin(), src.end(), get_ptr_sector(buff, coord->width, idx));
+        coord->act_size[idx] = src.size();
+        pthread_rwlock_wrlock(&(coord->lcs_leaving[idx]));
+        idx = !idx;
+        pthread_rwlock_unlock(&(coord->lcs_active[!idx]));
+        first_send = false;
+        return src.size()>0;
     }
 
     // For senders this will signal if we're ready to start sending, for 
     // receivers if there's data to be read
     bool ShmSender::ready(){
-
+        throw NotImplemented();
     }
     
-    ShmSender::ShmSender(Method Method, Role role, OptArgs& args){
+    ShmSender::ShmSender(Method Method, Role role, OptArgs& args):
+        idx(0), first_send(true){
+        
+        std::cout << "Passwd: " << args.passwd <<std::endl
+                  << "Width: " << args.width << std::endl
+                  << "Readers: " << args.readers <<std::endl;
 
+        std::string path_sem = "/ocp.shm.sem." + args.passwd;
+        path_shm = "/ocp.shm.mem." + args.passwd;
+        fds = shm_open(path_shm.data(), O_CREAT | O_EXCL | O_RDWR, 0660);
+        if (fds == -1){
+            throw FileError();
+        }
+
+        size_t pg_sz = sysconf(_SC_PAGE_SIZE);
+        size_t cd_sz = sizeof(struct Coord);
+        size_t n = cd_sz/pg_sz;
+        size_t off = pg_sz*(1+n);
+
+        ftruncate(fds, off + 2*args.width);
+
+        coord = (struct Coord*) mmap(NULL, sizeof(struct Coord), 
+                                    PROT_READ | PROT_WRITE, 
+                                    MAP_SHARED, 
+                                    fds, 0);
+        if (coord == (void*)-1){
+            perror("Error in mmapping coord");
+            throw OwnError();
+        }
+        buff = (char*) mmap(NULL, 2*args.width, PROT_READ | PROT_WRITE, MAP_SHARED, fds, off);
+        if (buff == (char*)-1){
+            perror("Error in mmapping buff");
+            throw OwnError();
+        }
+        
+        coord->offset = off;
+        coord->width = args.width;
+        condvar_init(&(coord->rdr_cnt));
+        init_rwlock(&(coord->lcs_active[0]));
+        init_rwlock(&(coord->lcs_active[1]));
+        init_rwlock(&(coord->lcs_leaving[0]));
+        init_rwlock(&(coord->lcs_leaving[1]));
+        sem_init(&(coord->copy_sem), 1, args.readers);
+        coord->act_size[0]=0;
+        coord->act_size[1]=0;
+        pthread_rwlock_wrlock(&(coord->lcs_active[0]));
+
+        auto sem_coord = sem_open((char*) path_sem.data(), O_CREAT|O_RDWR, 0666, 0);
+        sem_post(sem_coord);
+        coord->rdr_cnt.wait_until_RETLOCK(args.readers);
+        pthread_mutex_unlock(&(coord->rdr_cnt.lock));
+        sem_close(sem_coord);
+        sem_unlink(path_sem.data());
     }
 
     ShmSender::~ShmSender(){
-
+        if (first_send){
+            pthread_rwlock_unlock(&(coord->lcs_active[0]));
+        } else {
+            pthread_rwlock_unlock(&(coord->lcs_leaving[!idx]));
+        }
+        coord->rdr_cnt.wait_until_RETLOCK(0);
+        munmap(buff, coord->width * 2);
+        munmap(coord, sizeof(struct Coord));
+        close(fds);
+        shm_unlink(path_shm.data());
     }
 
     size_t ShmReceiver::buff_size(){
@@ -88,13 +158,12 @@ namespace SHM{
         idx(1), finished(false), read_chunk(true), buff(nullptr), coord(nullptr){
         
         std::string path_sem = "/ocp.shm.sem." + args.passwd;
-        sem_t* sem_coord = sem_open((char*) path_sem.data(), O_CREAT | O_RDONLY, 0660);
-        if (sem_coord == NULL) {throw FileError();}
         sem_t* sem_coord = sem_open((char*) path_sem.data(), O_CREAT | O_RDWR, 0660, 0);
         if (sem_coord == NULL) {std::cout << "error semaphore" << std::endl; throw FileError();}
 
         int r = sem_wait(sem_coord);
         if (r!=0){throw OwnError();}
+        std::cout << "Semaphore unlocked" << std::endl;
         sem_post(sem_coord);
         sem_close(sem_coord);
         //std::cout<< "Passed the semaphore" << std::endl;

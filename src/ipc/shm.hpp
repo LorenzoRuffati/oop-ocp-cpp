@@ -7,6 +7,13 @@
 
 namespace SHM{
     class ShmSender: public IPC {
+        private:
+            struct Coord* coord;
+            char* buff;
+            bool first_send;
+            int idx;
+            int fds;
+            std::string path_shm;
         public:
             size_t buff_size() final;
             std::vector<byte> receive(size_t max_read) final;
