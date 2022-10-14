@@ -22,6 +22,12 @@ namespace SHM{
     };
 
     class ShmReceiver: public IPC {
+        private:
+            struct Coord* coord;
+            char* buff;
+            bool finished, read_chunk;
+            int idx;
+            int fds;
         public:
             size_t buff_size() final;
             std::vector<byte> receive(size_t max_read) final;
@@ -41,13 +47,24 @@ namespace SHM{
         int var;
         pthread_cond_t cond;
         
-        void change(int change);
-        void wait_until(int targ);
+        inline void change(int change){
+            pthread_mutex_lock(&lock);
+            var = var + change;
+            pthread_cond_signal(&cond);
+            pthread_mutex_unlock(&lock);
+        }
+        inline void wait_until_RETLOCK(int targ){
+            pthread_mutex_lock(&lock);
+            while (var != targ){
+                pthread_cond_wait(&cond, &lock);
+            }
+        }
     };
     void condvar_init(CondVar*);
     void init_rwlock(pthread_rwlock_t*);
 
     struct Coord {
+        size_t offset;
         size_t width;
         sem_t copy_sem;
         struct CondVar rdr_cnt;
