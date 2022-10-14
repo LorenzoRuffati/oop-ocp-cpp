@@ -90,6 +90,8 @@ namespace SHM{
         std::string path_sem = "/ocp.shm.sem." + args.passwd;
         sem_t* sem_coord = sem_open((char*) path_sem.data(), O_CREAT | O_RDONLY, 0660);
         if (sem_coord == NULL) {throw FileError();}
+        sem_t* sem_coord = sem_open((char*) path_sem.data(), O_CREAT | O_RDWR, 0660, 0);
+        if (sem_coord == NULL) {std::cout << "error semaphore" << std::endl; throw FileError();}
 
         int r = sem_wait(sem_coord);
         if (r!=0){throw OwnError();}

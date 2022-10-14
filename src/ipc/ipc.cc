@@ -222,8 +222,12 @@ std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args
         case Method::shm:
             switch (role){
                 case Role::receiver:
+                    std::cout << "IPC factory" << std::endl;
+                    return std::unique_ptr<IPC>(new SHM::ShmReceiver(method, role, args));
                     break;
                 case Role::sender:
+                    std::cout << "Creating shm sender" << std::endl;
+                    return std::unique_ptr<IPC>(new SHM::ShmSender(method, role, args));
                     break;
                 default:
                     break;
