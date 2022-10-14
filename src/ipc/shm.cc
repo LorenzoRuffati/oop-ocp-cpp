@@ -1,6 +1,14 @@
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "shm.hpp"
+#include "src/utils/utils.hpp"
 
 namespace SHM{
+    char* get_ptr_sector(char* base, size_t width, int idx){
+        return base + (width*idx);
+    }
     size_t ShmSender::buff_size(){
 
     }
@@ -53,6 +61,28 @@ namespace SHM{
 
     }
     ShmReceiver::~ShmReceiver(){
+    void UNSAFE_write_to_chunk(struct Coord* coord, int idx, std::vector<byte> payload, char* buff){
+        char* beg = buff + (idx * coord->width);
+        std::copy(payload.begin(), payload.end(), beg);
+        coord->act_size[idx] = payload.size();
+    }
 
+    void condvar_init(CondVar* var){
+        pthread_mutexattr_t attr;
+        pthread_mutexattr_init(&attr);
+        pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+        pthread_mutex_init(&(var->lock), &attr);
+        var->var = 0;
+        pthread_condattr_t cattr;
+        pthread_condattr_init(&cattr);
+        pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
+        pthread_cond_init(&(var->cond), &cattr);
+    }
+
+    void init_rwlock(pthread_rwlock_t* lock){
+        pthread_rwlockattr_t attr;
+        pthread_rwlockattr_init(&attr);
+        pthread_rwlockattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+        pthread_rwlock_init(lock, &attr);
     }
 }

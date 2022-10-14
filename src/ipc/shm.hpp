@@ -56,7 +56,7 @@ namespace SHM{
         size_t act_size[2];
     };
 
-    void write_to_chunk(struct Coord* coord, int idx, std::vector<byte> payload, char* buff);
+    void UNSAFE_write_to_chunk(struct Coord* coord, int idx, std::vector<byte> payload, char* buff);
 }
 
 #endif
