@@ -56,7 +56,7 @@ void SetupCoord::SetUp(){
     sem_path = "/ocp.shm.sem." + args.passwd;
     shm_path = "/ocp.shm.mem." + args.passwd;
 
-    fd_s = shm_open((char*)shm_path.data(), O_CREAT | O_EXCL | O_RDWR, 0666);
+    fd_s = shm_open((char*)shm_path.data(), O_CREAT | O_RDWR, 0666);
     ASSERT_NE(fd_s, -1);
     
     size_t pg_sz = sysconf(_SC_PAGE_SIZE);

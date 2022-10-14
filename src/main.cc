@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
     }
 
     std::unique_ptr<Actor> actr = ActorFactory::create(parsed.role, parsed.optargs);
+    std::cout << "Created actor" << std::endl;
+
     std::unique_ptr<IPC> ipc = IPCFactory::get_ipc(parsed.method, parsed.role, parsed.optargs);
     std::cout << "Running" << std::endl;
 
