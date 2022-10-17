@@ -164,6 +164,10 @@ namespace MQ { // Handles queue IPC method
         }
     }
 
+    MQWrite::~MQWrite(){
+        mq_close(mqd);
+    }
+    
     size_t MQWrite::buff_size(){
         struct mq_attr attr;
         auto r = mq_getattr(mqd, &attr);
@@ -200,7 +204,6 @@ using namespace MQ;
 using namespace SHM;
 
 std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args){
-    std::cout << method_repr(method) << " " << role_repr(role) << std::endl;
     switch (method){
         case Method::queue:
             switch (role){

@@ -40,12 +40,10 @@ ParsedRes::ParsedRes(int argc, char** argv)
             valid = true;
             if (vm.count("queue")){
                 method = Method::queue;
-                std::cout << "Using queue\n";
             }
             if (vm.count("memory")){
                 if (method != Method::undefined){valid = false;}
                 method = Method::shm;
-                std::cout << "Using shared memory\n";
             }
 
             if (vm.count("receiver")){

@@ -78,6 +78,7 @@ namespace MQ {
 
         public:
             MQWrite(Method Method, Role role, OptArgs& args);
+            ~MQWrite();
 
             size_t buff_size() final;
 
