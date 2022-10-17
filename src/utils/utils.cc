@@ -3,7 +3,6 @@
 namespace po = boost::program_options;
 
 void on_filename(std::string name){
-    std::cout << "Got filename: " << name << std::endl;
 }
 
 void validate_pass(std::string passwd){
@@ -19,7 +18,6 @@ ParsedRes::ParsedRes(int argc, char** argv)
         ("receiver,r", "Receiver")
         ("queue,q", "Use a queue")
         ("memory,m", "Use shared memory")
-        //("pi", po::value<float>()->default_value(3.14f), "Pi")
         ("file,f", po::value< std::string >()->notifier(on_filename), "Filename")    
         ("buffer,w", po::value<size_t>()->default_value(1024), "The size of the buffer to use, currently only meaningful for shared memory")
         ("readers,n", po::value<int>()->default_value(1),
@@ -61,14 +59,10 @@ ParsedRes::ParsedRes(int argc, char** argv)
                 valid = false;
             } else {
                 optargs.filename = vm["file"].as<std::string>();
-                std::cout << "Parsed filename" << std::endl;
                 optargs.passwd = vm["pass"].as<std::string>();
-                std::cout << "Parsed password" << std::endl;
             }
             optargs.readers = vm["readers"].as<int>();
-            std::cout << "Parsed readers" << std::endl;
             optargs.width = vm["buffer"].as<size_t>();
-            std::cout << "Parsed width" << std::endl;
         }
     }
     catch (const po::error &ex){

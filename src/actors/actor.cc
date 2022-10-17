@@ -13,7 +13,6 @@ class Sender: public Actor {
         Sender(OptArgs& args):
             in_stream(args.filename, std::ios::in | std::ios::binary)
             {
-            std::cout << "Creating sender" << std::endl;
         }
 
         int execute(IPC& ipc) final{
@@ -37,6 +36,7 @@ class Sender: public Actor {
                     throw std::exception();
                 }
                 ipc.send(vectr);
+                //std::cout << "Sent " << vectr.size() << " bytes to readers" << std::endl;
                 vectr.clear();
             }
             buff.clear();
@@ -62,6 +62,7 @@ class Receiver: public Actor {
             while (ipc.ready()){
                 bytes = ipc.receive(buff_size);
                 out_stream.write((char*)bytes.data(), bytes.size());
+                //std::cout << "Got " << bytes.size() << " bytes from sender" << std::endl;
             }
             return 0;
         }

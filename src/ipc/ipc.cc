@@ -7,7 +7,6 @@ class MockIPC: public IPC{
     public:
         MockIPC(OptArgs& args):
             reads(3){
-            std::cout << "Creating IPC" << std::endl;
         }
 
         size_t buff_size() final{
@@ -19,7 +18,6 @@ class MockIPC: public IPC{
         }
         
         bool send(std::vector<byte> payload) final{
-            std::cout << "Sending a vector " << payload.size() << " long" << std::endl;
             for (char i: payload) {
                 std::cout << i <<'.';
             }
@@ -49,7 +47,7 @@ namespace MQ { // Handles queue IPC method
         if (op_l == -1){
             if (errno == EEXIST){
                 std::cout << lock_name << " exists, if the previous process crashed" 
-                << "run the cleaner" << std::endl;
+                << "run the cleaner or delete the file manually" << std::endl;
             }
             throw FileError();
         }
@@ -202,7 +200,6 @@ using namespace MQ;
 using namespace SHM;
 
 std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args){
-    std::cout << "IPC factory" << std::endl;
     std::cout << method_repr(method) << " " << role_repr(role) << std::endl;
     switch (method){
         case Method::queue:
@@ -220,11 +217,9 @@ std::unique_ptr<IPC> IPCFactory::get_ipc(Method method, Role role, OptArgs& args
         case Method::shm:
             switch (role){
                 case Role::receiver:
-                    std::cout << "IPC factory" << std::endl;
                     return std::unique_ptr<IPC>(new SHM::ShmReceiver(method, role, args));
                     break;
                 case Role::sender:
-                    std::cout << "Creating shm sender" << std::endl;
                     return std::unique_ptr<IPC>(new SHM::ShmSender(method, role, args));
                     break;
                 default:

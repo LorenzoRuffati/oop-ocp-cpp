@@ -43,9 +43,9 @@ namespace SHM{
     ShmSender::ShmSender(Method Method, Role role, OptArgs& args):
         idx(0), first_send(true){
         
-        std::cout << "Passwd: " << args.passwd <<std::endl
-                  << "Width: " << args.width << std::endl
-                  << "Readers: " << args.readers <<std::endl;
+        std::cout << "Passwd  : " << args.passwd <<std::endl
+                  << "Width   : " << args.width << std::endl
+                  << "Readers : " << args.readers <<std::endl;
 
         std::string path_sem = "/ocp.shm.sem." + args.passwd;
         path_shm = "/ocp.shm.mem." + args.passwd;
@@ -163,7 +163,6 @@ namespace SHM{
 
         int r = sem_wait(sem_coord);
         if (r!=0){throw OwnError();}
-        std::cout << "Semaphore unlocked" << std::endl;
         sem_post(sem_coord);
         sem_close(sem_coord);
         //std::cout<< "Passed the semaphore" << std::endl;
