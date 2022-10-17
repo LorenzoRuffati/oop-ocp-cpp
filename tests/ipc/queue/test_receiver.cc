@@ -7,7 +7,7 @@ TEST(QueueNotExist, CreateReceiver){
         args.passwd= "password";
         args.filename = std::string{"test_queue"};
         auto mq = MQRead(Method::queue, Role::receiver, args);
-        ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
+        SUCCEED();
     }
     catch(const std::exception& e)
     {
@@ -21,7 +21,7 @@ TEST_F(QueuePreexist, CreateReceiver){
         OptArgs args;
         args.passwd = passwd;
         auto mq = MQRead(Method::queue, Role::receiver, args);
-        ASSERT_TRUE(mq.ready()) << "Queue created but ready fails";
+        SUCCEED();
     }
     catch(const std::exception& e)
     {
