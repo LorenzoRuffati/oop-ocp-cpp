@@ -1,3 +1,4 @@
+'https://www.planttext.com/?text=bLF1JiCm3BtdAtn2dKf_O9ecq2Ga3XCm3XmGgjBKQoErJKdSGHdyEsxJZcu849SgjL-Udv-T2qVIKbCMa4Yd5QX2EeTE2D9K8Ap246vMjqB8n96LYZm0BXKP2ti14EgA05zHDOJ1zUtgR2O-li4vteFtO_m3GgVVC2P8ckqsxix1x0Immwx88ca9bs1HeTvXu6-TGWSkXrKQJA-TuX9Z2gQIQHlqCeMNTvzBY-aQopq7AqC8PEevt2CVSWJNfw74qjWMN8rARzcgLClCodBWMDzjcBVl4Y2g9ULpuBgwodoawnFj7ARoV8QQki05jJMU7sMNa2759JedC-yEWpktXv2BNwGcBZ3aGYyXM2Fb9Zs7ZIcOyQQcIvkvVYoZqWUhkSV_Ims7gx-KE5W9KVI-x0Ol1cSc_xx-8J1EWQU7Tg8grjL1s2X-u_VW26OQck0yZMVlrrICTwOnCTdZAzbzMx-X_1v8AzwLfjBF3SOrsKMFMeBYpU7cV_ALM_cJYJ5-hBfMlxWeZdH5ZxbEKwoU1ksJGb-f8sV7Q3IifRXWK_YHVm80
 @startuml basic classes
 
 title C++ OCP
@@ -15,22 +16,8 @@ abstract class IPC {
 
 
 class SharedMem{
-    -path_coord: string
-    -path_copy: string
-    -coord: unique_ptr<Coord>
-    -copy: unique_ptr<Copy>
-    +SharedMem(Method, Role, OptArgs&)
 }
-class PipeRead{
-    -path: string
-    -buffer: vector<byte>
-    +PipeRead(Method, Role, OptArgs&)
-}
-class PipeWrite{
-    -path: string
-    -buffer: vector<byte>
-    +PipeWrite(Method, Role, OptArgs&)
-}
+note top: See the shared memory specific diagram
 class MQRead {
     -path: string
     -buffer: vector<byte>
@@ -44,8 +31,6 @@ class MQWrite {
     +MQWrite(Method, Role, OptArgs&)
 }
 SharedMem --|> IPC
-PipeRead --|> IPC
-PipeWrite --|> IPC
 MQRead --|> IPC
 MQWrite --|> IPC
 
@@ -68,5 +53,4 @@ class IPCFactory {
 ActorFactory -[hidden] Actor
 IPCFactory -[hidden] IPC
 MQWrite -[hidden]- MQRead
-PipeWrite -[hidden]- PipeRead
 @enduml

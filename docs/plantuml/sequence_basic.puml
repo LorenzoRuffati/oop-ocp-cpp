@@ -1,17 +1,18 @@
+'https://www.planttext.com/?text=TLJ1Rjim3BtpAxZiqXxy0qPG51qm8C2m5lPXs6bG7COH9bkUHBVBclvxITbU5BGz1B8U7yd79oAtaKtWiNEuDT4sloBzWKz3C6rdaCd_GmuZ0R1bHxYwKmuAPwI-eHMOXdt0clhTG_0Dx0mRAIF4JJ-CZ7lhQ8KcukOh3DB6DdOmFQS42XgeOUl_2ltX2zgUAUoDbCNFtsnxu3iddVCqfHKnvKvLwxVXG0tPnxbh1KAM1fcm-v4lbDrVAgkczAIjciSJB4sdL_jecCu3BnzOtAYQ_mJvleXbeJghirIUprIbogfK0CzoavbUCEDa564uxmSyY5uT4b2yndM1TOajSOOLAgDSW7fINABQUQNWTKBNHP5W_njEfvFQft1nir2Hke6FWlLUkZlQitmZcduAO4SncfRmoJg7qRQzSSW7IgJfvUHgM37PBDF7lI0sOkExmH4hKRjeTP2svysYpC1DKlzUJ7pFcGi3e0caYBnsfRbo9jj-76GFSDuPrI6qtH6UzPXSdzwad09Nrs0SIubaaw0_AK96IMM4T2Oak-UM9Ju5Ao8IbjnraJBkTv_yrj-Kign7Db85cuz2iYqvSIQSHrbBsh9D9PgmjV80uOWxSkO8S2jzvM_W5G00
 @startuml basic_seq
 !pragma teoz true
 
 title "Basic sequence"
+actor SendProc
 database "Input file" as IF
 participant Sender as S
-actor SendProc
 box "IPC interface" #LightBlue
 participant "IPC-sender" as IS
 participant "IPC-receive" as IR
 endbox
-actor RecProc
-participant Receiver as R
 database "Output file" as OF
+participant Receiver as R
+actor RecProc
 
 activate SendProc
 SendProc -> IS
@@ -27,19 +28,18 @@ activate IR
 {actrec} RecProc -> R
 activate R
 
-loop While is ready and has data
-S -> IS: ready()
-alt
-S <-- IS: Yes
-IF <- S: get data
-IF --> S: data
-S -> IS: send(data)
-S <-- IS: ok
+loop has data
+  IF <- S: get data
+  IF --> S: data
+  S -> IS: send(data)
+  S <-- IS: ok
 |||
-else
-S <-- IS: No
 end
-end
+  S->IS: send empty
+  note left
+    an empty message will signal the
+    sender that the transfer is complete
+  end note
 S->SendProc
 deactivate S
 IS -> SendProc

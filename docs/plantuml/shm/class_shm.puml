@@ -1,8 +1,7 @@
+'https://www.planttext.com/?text=bLHDZzCm4BtxLmnxwYvR8N6C45gf4c8FN2ZYWb0qjIU9XJygsqasY_ZlZEsqsqKh19VM7h_np7lpdBkOCAJH6eY3RQN16CMhOy3U8YJoZv32I2BfP0YkzWC6Kc39-h100OFIs0UqLqBK_VxZfpqv1Jy5m1Qazq6raMohNUSRs9EzvyNJMGEx_7TJ8eUnwngGNANkvHW2kTI0Tga4vk0JjPt1le63zuQ3hqyLDp45xVfRYFgHsdIRawuBe0RAxMrURvw5OywTI2OVtXsMHE_hQRuU0g5Q6FxhWjrdajD_ilitSfrsEWwapjIsfVuBT7CBAzs_ChnanNT9qXDjAlPbadpdA5DjUkLOxforIaEpbbdf7PVsY3bwwh-4M0p6aSNZu0DL4Ygqqe-PwiuxzHL32HilVyGMPUAclhtzta2OS-ZYp11EJF7FGuK92yjoiFR4pJls1WJT3qdSmwoD0Ox0W1F11qCF-i0MnX1moGO-K00HFTo3pHc04MRY54kXfrK0T4hic1JNS98OYcwPETqHFuBamQ8RqPX5I9QGQwVXL61pD2Z9ydWPF7DcFrACro8_ZDoc49lhh59R7TJft5g4ADahgzDMgTOfPF8Ds37HGzbF62w5TqedxLrJbbCHcAVljO8PTMfPUsqsv_TG3jY8hgUduAvcrW2hAKuF-MQxhOsTlEyl0cT4zNaPWQ4kWNTWjCi3-yAgd0sHDQrOxJ2tp03i-q1zsRsHtXvzB6I0lqnfZC28G9rXAxF0c7zeOPa95B5T_SApOCXXAVBdnqpXjam-xrVJXoVbBrdKfaMTTcLH_Idk6CyVnTy0
 @startuml shm_class
 !pragma teoz true
-title "Shared memory class diagram V2"
-
-class SemInfo {}
+title "Shared memory class diagram"
 
 class SHMSend {
   - coord_sem_info: SemInfo
@@ -37,12 +36,14 @@ struct Coord {
   - locks_active[2]: rwlock
   - locks_leaving[2]: rwlock
   - data_size[2]: size_t
-  + vector<byte> read(int, char*)
-  + size_t write(int, char*, vector<byte>)
-  + bool lock_next(int)
-  + size_t size_chunk(int)
-  + Coord(size_t, int)
 }
+
+note right
+I will not have Flexible array member 
+so I might as well merge Coord and
+Copy since I anyway need to manually
+create the array (placement new I guess)
+end note
 
 () sem_coord_file as scrd
 
@@ -55,17 +56,16 @@ class CondVar {
   + Condvar(int)
 }
 
-note as N1
-I will not have Flexible array member 
-so I might as well merge Coord and
-Copy since I anyway need to manually
-create the array (placement new I guess)
-end note
 
 SHMSend *-- scrd
 SHMRecv o-- scrd
-
 SHMSend *-- Coord
+note left on link
+  The semaphore and Coordination
+  aggregation/composition status 
+  reflect that they are destroyed 
+  by the sender, not the receiver
+end note
 SHMRecv o-- Coord
 
 Coord *-- CondVar

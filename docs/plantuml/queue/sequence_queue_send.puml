@@ -1,18 +1,25 @@
+'https://www.planttext.com/?text=RLJDRjim3BxhARXS1hGhi5s3PIdGhaCEtP1bm2u51iMYRM6ov4bKcnHv-56o7TlPSWWYakBtGogtWQIds1ZOHepuAw1LuathPTL887IlG3wY4AJ982no4QGYzB37MZvh5_r2jDn45xgLbeQY5wy9_G9aWCrEeEKEnmuaXRQYyYwsSETH4We0MP1-vf-fc4-6u4-kLGu3M4U01ns8Ky0LSFC9jd1rnSV4TmnTNo_XMuksGxz8V442RKl7OOyKlHrE8rhDr1eCGLOOCjRwuyrcjuG7gKtqc4DC1i7hggObFAAq0II7QZQaammwT6hmJ4_XNDxfT69758ZUXNqiImZw5SMQsJBdHFTH7WOkERSMKp4yDn9J6Lsol_lvG9uXSsDcb5lFIVHNSoQHx9byHwcEp732OnFOBewkptOcH-vgB7v3gQqEDIeeZQn6N-VXt7xwwQ1sdJSJf1G19KdsCndK6xGLrR1QmVlf0h09E1QrNZkVTcm57oPLYMigksJwxzvazBwRc8_vfpO6ziQnObq2p_h9Tll2eowZCQFoD9OOe70A_nlC8c3kU85fLpAUmPB0bPdrLrxwJTCQRFZne9hU-O7IA_TYqxhqtjrZ8E-EmuvCfxsz67tQlZCQwzOCSeJ2kC1FZSNrR-7X_br-VVOjyGBdxg19T3nk-Pl_DVu2
 @startuml Queue_send
 !pragma teoz true
 
 title "Queue sender behaviour"
-participant "IPC-sender" as IS
+participant "Queue writer" as IS
 entity Queue as Q
-
-alt queue does not exist
-IS -> Q **
-end
-
-IS -> Q ++: Open write
-IS -> Q: Get info
-IS <-- Q: info
-|||
+group Create
+  activate IS
+  alt queue does not exist
+    IS -> Q **
+  end
+  IS -> Q ++: Open write
+  IS -> Q ++: Get info
+  return info
+  alt queue has messages
+    ?<-IS: Failure
+    note right: Means another writer is active
+  end
+  deactivate IS
+  |||
+end 
 
 group buff size
 ?-> IS ++: Max message size?
@@ -24,33 +31,46 @@ return size
 end
 
 group Ready
-?-> IS ++: Is ready?
-IS -> Q ++: has reader?
-return
-return bool
+  ?-> IS ++: Is ready?
+  IS -> IS: Check finished flag
+  return finished flag
 end
 
+
+
+
+
+
+
+
+
+
+
+
+
 group Send
-?-> IS ++: Send data
-IS -> Q ++: write(data)
-note right: Will block if the\nqueue is full
-return status code
-IS -> IS ++: Check result
-deactivate IS
-return ret_code
+  ?-> IS ++: Send data
+  alt message length == 0
+    IS -> Q: set message priority = 1
+    IS -> IS: set finished flag
+  end
+  IS -> Q ++: Send message
+  note right: Will block if the\nqueue is full
+  return status code
+  return status code == 0 
 end
 
 group Receive
-?->IS
-note right: Not Implemented
+note left of IS: Not Implemented
 end
 
 group Teardown
 ?->IS ++: Destroy
-IS -> Q ++: Send end of transmission message
-return
-note right: Will block if queue full
-return
+IS -> Q
+deactivate Q
+deactivate IS
+|||
+note left: Simply closes the queue FD, doesn't destroy it
 
 end
 

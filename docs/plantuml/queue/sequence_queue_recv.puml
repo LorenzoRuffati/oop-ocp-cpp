@@ -1,18 +1,28 @@
+'https://www.planttext.com/?text=XLN1Rjim3BthAzXS1gJjPSTWQpfi0rOWMz6km0uz14fC9y9aoPFafYxwyQDeAP6J5VCXjYZowP5yLDu5z45S-o1Tw1eDTnrsk7IuHlM4JforJcuQ2G7j2mJNeH111OqmOKV8Zh32hNnIjdCJqHAKMgjMcd3iDW7fuUPUe26KVZWickwoPM7NlskbsRWG6sUx5Zuxb45P8m3aEgWd6J1Yq4e7q3cWikZ1s03uh2WZeEVc7YwlO36TpcY9skF1cvqyUyq_N9Bd36gfTEUGROH3fDLcEm01J3wHQKjv4fUANihpbpARYnmuOLSq5KSB_ama_t2URpAyW-aKO1-HZUVdCxXjqV19PAzmdFxhwok869BgjEhg6hnwGJ6dU4A90D_bCpJelTmWxyr52Kzj3y9Xw9m1PMgRDbFir-VWw4W6ffmPUamYXV8ECqdFGEYUUFVYyV8guV5wdcgobNvPAwFy5gjHBQ8dRMRMViwxwIHf_8va6IqHf4UV6fI9foKrTUWgQvOR4_jlx7_SQqbkkP5PDP5DxDkRTB_P7JJIzF_cR9QDt-mfymgkFiBxmzbyz4DcMieFaWNWrkWUh45MMExeJcaDECmVU9gXYqD0WzAGFa7IaA3qWODpO4n9GYjxRMMLGWhf3ecFQZLaki6GCKwupk1NfBEAGvOsKmN64RdsCzXjrNeBeM_pLdeL-bWIlghLEjy0fvHEjLASlB9MxstxBXVM90lNIBqSqoo9-c0TqeIaKJX538Vc3S8vlFddU7RZPZamvPE7XwzCyYscsUsDiKHfBei2Y37jusuTTjOa2PS1QYq7VJucAHvYHZTI4a1HfvF-bcfePByN0tUKp7HQwvHrTDUNKtH-NWvCIVajm87OKK1n6VwCtnoiiIRjrvpO3vhYcwRLsD2iO5K6F511AhipyV9CrVv2VutEzliRy-ni1ccnY8jq_Oa1vff-wH_qBm00
 @startuml Queue_receiver
 !pragma teoz true
 
 title "Queue receiver behaviour"
-participant "IPC-receiver" as IR
+participant "Queue receiver" as IR
 entity Queue as Q
-
-alt queue does not exist
-IR -> Q **
+entity Lockfile as L
+group Creation
+  activate IR
+  alt lockfile does not exist
+    IR -> L**:
+  else lockfile exists
+    ?<- IR: failure
+    note right
+      "Another reader is reading, failure"
+    end note
+  end
+  alt queue does not exist
+    IR -> Q **  
+  end
+  IR -> Q ++: Open read
+  deactivate IR
+  ||| 
 end
-
-IR -> Q ++: Open read
-IR -> Q: Get info
-IR <-- Q: info
-|||
 
 group buff size
 ?-> IR ++: Max message size?
@@ -22,6 +32,13 @@ IR -> IR ++: Extract buffer size
 deactivate IR
 return size
 end
+
+
+
+
+
+
+
 
 group Ready
 [->IR ++: Ready?
@@ -36,43 +53,79 @@ group Ready
       ?<-- IR: false
     end
   else has not finished
-    IR -> Q ++: get message
-    note right: Will block
-    return message
-    IR -> IR: which type
-    
-    alt has_fin_notification
-      IR -> Q ++: has messages?
-      return bool
-      ?<-- IR: bool
-    else normal_message
-      IR -> IR: store in buffer
-      ?<-- IR: true
+    IR -> Q ++: How many messages?
+    return n_msg
+    alt n_msg >= 2
+      ?<- IR: True
+      note right 
+        Only one end message will ever be sent, 
+        meaning at least one message has a payload
+      end note
+    else
+      IR -> Q ++: get message
+      note right: Will block
+      return message
+      IR -> IR: which type
+      
+      alt has_fin_notification
+        IR -> Q ++: has messages?
+        return bool
+        ?<-- IR: bool
+      else normal_message
+        IR -> IR: store in buffer
+        ?<-- IR: true
+      end
     end
     
     deactivate IR
   end
 end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 group Receive
   ?-> IR ++: receive
   alt buffer has message
     IR -> IR: get message
-  else buffer is empty
-    IR -> Q++: get_message
+    IR -> IR: clear buffer flag
+    [<- IR: message
+  end
+  IR -> Q++: get_message
+  return message
+  note right: may block
+  alt higher priority
+    IR -> Q++
     return message
+    note right: may block
   end
   return message
 end
 
 group Send
-?->IR
-note right: Not Implemented
+note left of IR: Not Implemented
 end
 
 group Teardown
 ?->IR ++: Destroy
 IR -> Q !!: 
+IR -> L !!:
 return
 
 end
