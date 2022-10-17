@@ -1,0 +1,72 @@
+@startuml basic_seq
+!pragma teoz true
+
+title "Basic sequence"
+database "Input file" as IF
+participant Sender as S
+actor SendProc
+box "IPC interface" #LightBlue
+participant "IPC-sender" as IS
+participant "IPC-receive" as IR
+endbox
+actor RecProc
+participant Receiver as R
+database "Output file" as OF
+
+activate SendProc
+SendProc -> IS
+activate IS
+
+SendProc -> S
+activate S
+
+activate RecProc
+RecProc -> IR
+activate IR
+
+{actrec} RecProc -> R
+activate R
+
+loop While is ready and has data
+S -> IS: ready()
+alt
+S <-- IS: Yes
+IF <- S: get data
+IF --> S: data
+S -> IS: send(data)
+S <-- IS: ok
+|||
+else
+S <-- IS: No
+end
+end
+S->SendProc
+deactivate S
+IS -> SendProc
+deactivate IS
+deactivate SendProc
+
+
+create OF
+R -> OF
+loop While receive is ready
+{readrec} R -> IR: ready()
+alt
+R <-- IR: Yes
+R -> IR: receive()
+R <-- IR: data
+R -> OF: write data
+|||
+else
+R <-- IR: No
+end
+end
+
+R -> RecProc
+deactivate R
+IR -> RecProc
+deactivate IR
+deactivate RecProc
+{readrec} <-> {actrec}: arbitrary delay
+
+@enduml
