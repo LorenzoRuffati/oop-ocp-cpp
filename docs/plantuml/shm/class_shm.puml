@@ -1,0 +1,73 @@
+@startuml shm_class
+!pragma teoz true
+title "Shared memory class diagram V2"
+
+class SemInfo {}
+
+class SHMSend {
+  - coord_sem_info: SemInfo
+  - coord: Coord*
+  - buff: char*
+  - current: int
+  - wrote_flag: bool
+  + SHMSend(string, size_t, int)
+  + size_t buff_size()
+  + size_t send(vector<byte>)
+  + bool ready()
+}
+
+class SHMRecv {
+  - coord_sem_info: SemInfo
+  - coord: Coord
+  - buff: char*
+  - current: int
+  - finished: bool
+  - read_flag: bool
+  + SHMRecv(string)
+  + size_t buff_size()
+  + vector<byte> receive(size_t)
+  + bool ready()
+}
+
+struct Coord {
+  - buff_width: size_t
+  - copy_path: int
+  - copy_sem: semaphore
+  - rdr_count: CondVar
+  - locks_active[2]: rwlock
+  - locks_leaving[2]: rwlock
+  - data_size[2]: size_t
+  + vector<byte> read(int, char*)
+  + size_t write(int, char*, vector<byte>)
+  + bool lock_next(int)
+  + size_t size_chunk(int)
+  + Coord(size_t, int)
+}
+
+() sem_coord_file as scrd
+
+class CondVar {
+  - lock: mutex
+  - var: int
+  - condition: condvar
+  + void wait_until(int)
+  + void change(int)
+  + Condvar(int)
+}
+
+note as N1
+I will not have Flexible array member 
+so I might as well merge Coord and
+Copy since I anyway need to manually
+create the array (placement new I guess)
+end note
+
+SHMSend *-- scrd
+SHMRecv o-- scrd
+
+SHMSend *-- Coord
+SHMRecv o-- Coord
+
+Coord *-- CondVar
+
+@enduml

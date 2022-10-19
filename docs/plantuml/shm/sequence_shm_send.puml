@@ -1,0 +1,106 @@
+@startuml Shm_sender
+!pragma teoz true
+
+
+title "Shared memory sender behaviour"
+
+participant "Shared memory Sender" as SS
+entity "Semaphore coord" as SMCD
+box "Coordination struct"
+entity "Reader count var" as RDR
+entity "locks_active" as LA
+entity "locks_leaving" as LL
+entity "Semaphore copy" as SMCP
+end box
+entity "Copy buff" as MCP
+
+group create
+  activate SS
+  SS -> SS: Create file
+  SS -> SS: Truncate it to appropriate size
+  SS -> SS: Mmap it
+  SS -> RDR**
+  & SS -> LA**
+  & SS -> LL**
+  SS -> SMCP**: init with desired value
+  SS -> MCP**
+  
+  SS -> LA: Lock active[0]
+  SS -> SS: Set first_send_flag
+  alt semaphore does not exist
+    SS -> SMCD**
+  end
+  SS -> SMCD: post
+  SS -> RDR++: wait until all readers arrived
+  return
+  deactivate SS
+  |||
+end
+
+
+group ready
+note over SS: Not implemented for senders
+end
+
+
+
+
+
+
+group buff size
+  ?->SS++
+  SS -> SS: get buff_size from coord
+  return buff_size
+end
+
+
+
+
+
+group send
+  ?->SS++: vector
+  alt first_send_flag == False
+    SS -> LA++: lock[idx]
+    return
+    SS -> LL: release[!idx]
+  end
+  SS -> MCP++: write vector
+  return
+  SS -> SS: Write size to coord struct
+  SS -> LL++: lock idx
+  return
+  SS -> LA: release[idx]
+  
+  SS -> SS: Flip idx
+  SS -> SS: first_send_flag = False
+  return
+end
+
+
+
+
+
+
+
+
+
+
+
+group destructor
+  alt first_send_flag == True
+    SS -> LA: release [0]
+  else first_send_flag == False
+    SS -> LL: release [!idx]
+  end
+  SS -> RDR++: Wait until all readers left
+  return
+  SS -> SMCD!!
+  SS -> RDR!!
+  & SS -> LA!!
+  & SS -> LL!!
+  & SS -> SMCP!!
+  SS -> MCP!!
+  SS -> SS: close files
+  SS -> SS: Unlink files
+end
+@enduml

@@ -1,0 +1,5 @@
+/test_env
+/.vscode
+/bazel*
+/external
+/.gdb_history

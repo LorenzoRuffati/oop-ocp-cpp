@@ -1,0 +1,154 @@
+@startuml Shm_recv
+!pragma teoz true
+
+
+title "Shared memory receiver behaviour"
+
+participant "Shared memory receiver" as SR
+entity "Semaphore coord" as SMCD
+box "Coordination struct"
+entity "Reader count var" as RDR
+entity "locks_active" as LA
+entity "locks_leaving" as LL
+entity "Semaphore copy" as SMCP
+end box
+entity "Copy buff" as MCP
+
+group create
+  activate SR
+  alt "Coordination semaphore doesn't exist"
+    SR -> SMCD **: Create semaphore
+  end
+  {wait_beg_1} SR -> SMCD: wait
+  |||
+  SMCP<-]: Writer inits it with the required number
+  SMCD <-]: Writer is ready
+  {wait_end_1} SMCD --> SR: ok
+  SR -> SMCD: reincrease
+  note right: this way all readers access the memory,\nthey will fail on the copy sem
+  {wait_end_1} <-> {wait_beg_1}: Writer sets up sharedmemory 
+  |||
+  SR -> SR: MMap coordination struct
+  SR -> SMCP: Trylock copy semaphore
+  alt fail
+    SR <-- SMCP: Can't lock
+    ?<-SR: Fail
+  else success
+    SR <-- SMCP: Success
+    SR -> SR: MMap copy buffer
+    SR -> SR: read_flag to true
+    SR -> LL++: Lock leaving[1]
+    return
+    SR -> RDR: Signal reader ready
+  end
+  SR->SR: Close coordination semaphore file
+  ?<-SR: Success
+  deactivate SR
+end
+
+
+
+
+
+
+
+
+
+
+
+
+group ready
+  ?->SR++: ready?
+  alt finished flag set
+    ?<--SR: False
+  else has read current chunk
+    SR->LA ++: lock next chunk (reading)
+    note right: Blocks until next\nchunk is written
+    return
+    SR --> LL: Release previous leaving
+    SR -> SR: Change active
+    SR->SR: reset read flag
+    SR->MCP ++: get chunk size
+    return c_size
+    ?<--SR: c_size > 0
+  else Yet to read current and no finished flag
+    ?<--SR: True
+  end
+  alt finished
+    SR -> SR : Set finished flag
+    note left: This is done before\nactually returning
+    SR -> SR : Release lock
+    deactivate
+  end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+group buff size
+  ?->SR++
+  SR -> SR: get buff_size from coord
+  return buff_size
+end
+
+
+
+
+
+group receive
+  ?->SR++
+  note right
+  This is called after ready so I am already on the correct
+  chunk and it has data to read
+  end note
+  alt read_flag_set or finished flag set
+  ?<- SR: Fail
+  
+  end
+  SR -> MCP ++: Read data in current chunk
+  return vector
+  SR -> SR: set read flag
+  SR -> LL++: lock leaving
+  return
+  SR --> LA: release active
+  
+  return vector
+end
+
+
+
+
+
+
+
+
+
+group destructor
+  ?->SR++: Destroy
+  alt not finished
+    alt read_flag set
+      SR->LL: unlock
+    else read_flag false
+      SR -> LA: unlock
+    end
+  end
+  SR -> RDR: Notify left
+  SR->SR: Unmap memory
+  SR->SR: Close files
+  |||
+  destroy SR
+  |||
+end
+@enduml
